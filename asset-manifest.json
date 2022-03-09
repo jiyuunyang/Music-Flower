@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/Music-Flower/static/css/main.4c0152ea.css",
+    "main.js": "/Music-Flower/static/js/main.ddafb7e3.js",
+    "static/media/logo.png": "/Music-Flower/static/media/logo.07187ac29a527c3f30b4.png",
+    "index.html": "/Music-Flower/index.html",
+    "main.4c0152ea.css.map": "/Music-Flower/static/css/main.4c0152ea.css.map",
+    "main.ddafb7e3.js.map": "/Music-Flower/static/js/main.ddafb7e3.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.4c0152ea.css",
+    "static/js/main.ddafb7e3.js"
+  ]
+}
