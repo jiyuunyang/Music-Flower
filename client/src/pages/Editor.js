@@ -1,6 +1,6 @@
 // import SpotifyAPP from "../components/SpotifyApp";
 import axios from "axios";
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { MusicSelector } from "./UI_components/MusicSelector";
@@ -146,95 +146,70 @@ export default function Editor({
   handleLogout,
   handleMainPage,
   musicdata,
-  users,
-  loadMypage,
+  userInfo,
+  handleMypage,
   detailData,
   isRemake,
-}) {
-  // console.log("initData:", initData);
-  const [image, setPostPoto] = useState("");
-  const [postTitle, setPostTitle] = useState("");
-  const [postExplain, setPostintro] = useState("");
-  const [musicList, setMusicList] = useState([]);
+  postImage,
+  setPostPoto,
+  postTitle,
+  setPostTitle,
+  postExplain,
+  setPostintro,
+  musicList,
+  setMusicList,
 
+  serverURL,
+}) {
   console.log("수정하기 버튼으로옴?:", isRemake);
-  // let initData;
-  // if (isRemake) {
-  //   initData = {
-  //     img: detailData.image,
-  //     pTitle: detailData.postTitle,
-  //     pExplain: detailData.postExpain,
-  //     mData: detailData.MusicData,
-  //   };
-  // setPostPoto(detailData.image);
-  // setPostTitle(detailData.postTitle);
-  // setPostintro(detailData.postExpain);
-  // setMusicList(detailData.MusicData);
-  // } else {
-  //   initData = {
-  //     img: "",
-  //     pTitle: "",
-  //     pExplain: "",
-  //     mData: [],
-  //   };
-  // }
+  console.log("edit-detailData:", detailData);
+
   const submitHandle = () => {
     let musiclistid = musicList.map((el) => el.id);
-    let postData = {
-      userId: users.id,
-      image,
-      postTitle,
-      postExplain,
-      musicList: musiclistid,
-    };
-    if (!image && !postTitle && !postExplain) {
+
+    if (!postImage && !postTitle && !postExplain) {
       return alert("내용을 모두 작성해주세요");
     } else if (musicList.length === 0) {
       return alert("음악을 추가해 주세요");
     } else {
       axios
         .post(
-          "http://ec2-3-35-27-251.ap-northeast-2.compute.amazonaws.com/post",
+          `${serverURL}/post`,
           {
-            userId: users.id,
-            image,
+            userId: userInfo.id,
+            image: postImage,
             postTitle,
             postExplain,
             musicList: musiclistid,
           },
           { headers: { "Content-Type": "application/json" } }
         )
-        .then((res) => loadMypage());
+        .then((res) => handleMypage());
       //console.log("전송정보", postData);
     }
   };
   const remakeHandle = () => {
     let musiclistid = musicList.map((el) => el.id);
-    let postData = {
-      userId: users.id,
-      image,
-      postTitle,
-      postExplain,
-      musicList: musiclistid,
-    };
-    if (!image && !postTitle && !postExplain) {
-      return alert("내용을 모두 작성해주세요");
+    if (!postTitle && !postExplain) {
+      setPostTitle(detailData.postTitle);
+      setPostintro(detailData.postExplain);
+      return alert("내용을 수정해주세요");
     } else if (musicList.length === 0) {
       return alert("음악을 추가해 주세요");
     } else {
       axios
         .put(
-          `http://ec2-3-35-27-251.ap-northeast-2.compute.amazonaws.com/${detailData.id}`,
+          `${serverURL}/post/${detailData.id}`,
           {
-            userId: users.id,
-            image,
+            userId: userInfo.id,
+            image: postImage,
             postTitle,
             postExplain,
             musicList: musiclistid,
           },
           { headers: { "Content-Type": "application/json" } }
         )
-        .then((res) => loadMypage());
+        .then((res) => handleMypage());
       //console.log("전송정보", postData);
     }
   };
@@ -246,7 +221,6 @@ export default function Editor({
     // console.log("Inro", e.target.value);
     setPostintro(e.target.value);
   };
-  console.log("edit-detailData:", detailData);
 
   return (
     <div id="editorPage">
@@ -267,21 +241,19 @@ export default function Editor({
       <EditorBody>
         <div id="up">
           <div id="postImg">
-            post 이미지 선택
-            <br />
             <PostThumnailSelecter
               setPostPoto={setPostPoto}
-              image={image}
               detailData={detailData}
+              isRemake={isRemake}
             ></PostThumnailSelecter>
           </div>
           <div id="postInfo">
-            post 제목
+            제목
             {isRemake ? (
               <input
                 type="text"
                 id="textInput"
-                value={detailData.postTitle}
+                value={postTitle}
                 onChange={postTitleChageHandle}
               ></input>
             ) : (
@@ -294,13 +266,13 @@ export default function Editor({
           </div>
         </div>
         <div id="down">
-          <div>post 소개</div>
+          <div>소개글</div>
           <div id="postIntro">
             {isRemake ? (
               <input
                 type="textarea"
                 id="textInput"
-                value={detailData.postExplain}
+                value={postExplain}
                 onChange={postInroChageHandle}
               ></input>
             ) : (
@@ -310,11 +282,6 @@ export default function Editor({
                 onChange={postInroChageHandle}
               ></input>
             )}
-            <input
-              type="textarea"
-              id="textInput"
-              onChange={postInroChageHandle}
-            ></input>
           </div>
 
           <div id="musicList">
@@ -329,10 +296,8 @@ export default function Editor({
               </div>
               <div id="musicselectList">
                 {musicList.map((music, idx) => {
-                  // console.log("music", music);
                   return (
                     <div key={music.albumImageUrl}>
-                      {/* SavePlayList */}
                       <SelectMusicList
                         music={music}
                         idx={idx}
